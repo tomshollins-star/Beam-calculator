@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beam Calculator</title>
+  <meta name="description" content="Shear force, bending moment and deflection diagrams for statically determinate beams.">
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+        <path d="M3 12h26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M6 14l-3 6h6z M26 14l-3 6h6z" fill="currentColor"/>
+        <path d="M4 26 C 10 20, 22 20, 28 26" fill="none" stroke="var(--moment)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <h1>Beam Calculator</h1>
+    </div>
+    <label class="example-picker">
+      <span>Example</span>
+      <select id="example">
+        <option value="">Choose…</option>
+        <option value="ss-point">Simply supported · point load</option>
+        <option value="ss-udl">Simply supported · full UDL</option>
+        <option value="ss-tri">Simply supported · triangular load</option>
+        <option value="overhang">Overhanging beam · mixed loads</option>
+        <option value="cant">Cantilever · UDL + tip load</option>
+        <option value="moment">Simply supported · applied moment</option>
+      </select>
+    </label>
+  </header>
+
+  <main class="layout">
+    <section class="panel inputs" aria-label="Beam input">
+      <h2>Beam</h2>
+      <div class="grid2">
+        <label class="field">
+          <span>Length <em>m</em></span>
+          <input id="length" type="number" step="any" min="0" inputmode="decimal">
+        </label>
+        <label class="field">
+          <span>Supports</span>
+          <select id="support">
+            <option value="simple">Pin + roller</option>
+            <option value="cantilever-left">Cantilever · fixed left</option>
+            <option value="cantilever-right">Cantilever · fixed right</option>
+          </select>
+        </label>
+        <label class="field simple-only">
+          <span>Pin at <em>m</em></span>
+          <input id="supA" type="number" step="any" min="0" inputmode="decimal">
+        </label>
+        <label class="field simple-only">
+          <span>Roller at <em>m</em></span>
+          <input id="supB" type="number" step="any" min="0" inputmode="decimal">
+        </label>
+      </div>
+
+      <h2 class="with-toggle">
+        Section
+        <label class="switch"><input id="useEI" type="checkbox"><span>Deflection</span></label>
+      </h2>
+      <div class="grid2" id="eiFields">
+        <label class="field">
+          <span>E <em>GPa</em></span>
+          <input id="E" type="number" step="any" min="0" inputmode="decimal">
+        </label>
+        <label class="field">
+          <span>I <em>×10⁶ mm⁴</em></span>
+          <input id="I" type="number" step="any" min="0" inputmode="decimal">
+        </label>
+      </div>
+
+      <h2>Loads</h2>
+      <div class="add-row">
+        <button type="button" class="btn" data-add="point">+ Point</button>
+        <button type="button" class="btn" data-add="udl">+ Distributed</button>
+        <button type="button" class="btn" data-add="moment">+ Moment</button>
+      </div>
+      <ol id="loads" class="loads"></ol>
+      <p class="hint">Forces act downward when positive. Moments are clockwise when positive. Distributed loads can vary linearly from start to end.</p>
+
+      <h2>Display</h2>
+      <label class="switch block"><input id="tension" type="checkbox"><span>Plot bending moment on the tension side</span></label>
+    </section>
+
+    <section class="results" aria-label="Results">
+      <div id="errors" class="errors" role="alert" hidden></div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="panel diagrams" id="diagrams">
+        <div class="readout" id="readout" aria-live="polite">Hover or drag across a diagram to read values.</div>
+        <figure>
+          <figcaption>Loading &amp; reactions</figcaption>
+          <svg id="svgLoad" class="chart" role="img" aria-label="Loading diagram"></svg>
+        </figure>
+        <figure>
+          <figcaption><span class="dot shear"></span>Shear force <em>kN</em></figcaption>
+          <svg id="svgV" class="chart" role="img" aria-label="Shear force diagram"></svg>
+        </figure>
+        <figure>
+          <figcaption><span class="dot moment"></span>Bending moment <em>kN·m</em></figcaption>
+          <svg id="svgM" class="chart" role="img" aria-label="Bending moment diagram"></svg>
+        </figure>
+        <figure id="figY">
+          <figcaption><span class="dot defl"></span>Deflection <em>mm</em></figcaption>
+          <svg id="svgY" class="chart" role="img" aria-label="Deflection diagram"></svg>
+        </figure>
+      </div>
+
+      <div class="panel">
+        <div class="table-head">
+          <h2>Values at key points</h2>
+          <button type="button" class="btn ghost" id="csv">Download CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table id="table"></table>
+        </div>
+      </div>
+
+      <p class="footnote">Sign convention: shear is positive when the resultant to the left of a section acts upward; moment is positive when sagging. Units: kN, m. Valid for statically determinate beams with linear-elastic, small-deflection behaviour.</p>
+    </section>
+  </main>
+
+  <script src="src/solver.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

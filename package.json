@@ -1,0 +1,11 @@
+{
+  "name": "beam-calculator",
+  "version": "1.0.0",
+  "description": "Shear force, bending moment and deflection diagrams for statically determinate beams",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "npx --yes serve ."
+  },
+  "license": "MIT"
+}
